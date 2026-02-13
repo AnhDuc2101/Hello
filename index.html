@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thiệp Cưới Anh Đức & Phương Anh</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -12,37 +12,40 @@
             --bg: #e0e0e0;
         }
 
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Luôn giữ ở giữa theo chiều dọc */
-            align-items: center;    /* Luôn giữ ở giữa theo chiều ngang */
+            justify-content: center;
+            align-items: center;
             background-color: var(--bg);
             font-family: 'Arial', sans-serif;
-            overflow: hidden;
+            overflow: hidden; /* Ngăn cuộn trang lung tung trên mobile */
+            touch-action: manipulation;
         }
 
-        /* KHUNG CHỨA CHÍNH */
+        /* KHUNG CHỨA LINH HOẠT */
         .stage {
             position: relative;
-            width: 500px;
-            height: 350px;
+            width: 90vw;      /* Chiếm 90% chiều ngang màn hình */
+            max-width: 500px; /* Nhưng không quá 500px */
+            aspect-ratio: 500 / 350; /* Giữ tỉ lệ phong bì ngang */
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* PHONG BÌ (NGANG) */
+        /* PHONG BÌ */
         .envelope {
             position: absolute;
-            width: 500px;
-            height: 350px;
+            inset: 0;
             background-color: var(--red-velvet);
             background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
             border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             z-index: 30;
             display: flex;
             justify-content: center;
@@ -56,85 +59,83 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
-            user-select: none;
         }
 
-        .shuangxi { font-size: 80px; margin-bottom: 10px; }
-        .names { font-family: 'Dancing Script', cursive; font-size: 42px; margin: 5px 0; }
-        .hearts { font-size: 24px; }
+        .shuangxi { font-size: 15vw; max-font-size: 80px; margin-bottom: 5px; }
+        .names { font-family: 'Dancing Script', cursive; font-size: 8vw; max-font-size: 40px; }
+        .hearts { font-size: 5vw; max-font-size: 24px; }
 
-        /* THIỆP 1 (NGANG - MẶT NGOÀI) */
+        /* THIỆP 1 (NGANG) */
         .card-horizontal {
             position: absolute;
-            width: 460px;
-            height: 310px;
+            width: 92%;
+            height: 85%;
             background: white;
             z-index: 20;
-            border-radius: 8px;
+            border-radius: 5px;
             transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
         }
 
-        /* THIỆP 2 (DỌC - NỘI DUNG CHI TIẾT) */
+        /* THIỆP 2 (DỌC) */
         .card-vertical {
             position: absolute;
-            width: 400px;  /* Chiều ngang hẹp hơn */
-            height: 560px; /* Chiều dọc dài hơn */
+            width: 80%;       /* Thu nhỏ chiều ngang để thấy rõ là thiệp dọc */
+            height: 160%;     /* Trồi lên và dài xuống */
             background: white;
             z-index: 10;
             border-radius: 8px;
             transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            padding: 5px;
-            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             opacity: 0;
+            pointer-events: none;
         }
 
         img { width: 100%; height: 100%; object-fit: contain; }
 
-        /* --- LOGIC CĂN GIỮA KHI NHẢY BƯỚC --- */
+        /* --- HIỆU ỨNG MOBILE --- */
 
         /* Bước 1: Thiệp ngang trồi lên */
         .step-1 .card-horizontal {
-            transform: translateY(-120px); /* Trồi lên vừa phải */
+            transform: translateY(-30%);
             z-index: 40;
         }
 
-        /* Bước 2: Thiệp dọc xuất hiện đè lên */
-        .step-2 .card-horizontal {
-            transform: translateY(-120px) scale(0.9);
-            filter: blur(1px) brightness(0.8);
-            opacity: 0.5;
-        }
-
+        /* Bước 2: Thiệp dọc trồi lên đè hết */
         .step-2 .card-vertical {
             opacity: 1;
-            /* Căn giữa và trồi lên đè toàn bộ */
-            transform: translateY(-80px);
+            transform: translateY(-5%); /* Căn chỉnh vị trí trồi lên trên mobile */
             z-index: 50;
+            pointer-events: auto;
         }
+
+        .step-2 .card-horizontal { opacity: 0.3; }
 
         .hint {
             position: fixed;
-            bottom: 50px;
+            bottom: 30px;
+            font-size: 14px;
             font-weight: bold;
             color: #444;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: rgba(255,255,255,0.5);
-            padding: 10px 20px;
+            background: rgba(255,255,255,0.7);
+            padding: 8px 15px;
             border-radius: 20px;
+            z-index: 100;
+        }
+
+        /* Giới hạn kích thước chữ trên màn hình lớn */
+        @media (min-width: 500px) {
+            .shuangxi { font-size: 80px; }
+            .names { font-size: 40px; }
+            .hearts { font-size: 24px; }
         }
     </style>
 </head>
 <body>
 
 <div class="stage" id="mainContainer">
-
     <div class="envelope">
         <div class="gold-text">
             <div class="shuangxi">囍</div>
@@ -145,38 +146,37 @@
     </div>
 
     <div class="card-horizontal">
-        <img src="Thiệp%20Mời.png" alt="Mặt trước thiệp">
+        <img src="Thiệp%20Mời.png" alt="Card 1">
     </div>
 
     <div class="card-vertical">
-        <img src="Trân%20trọng%20kính%20mời.png" alt="Nội dung chi tiết">
+        <img src="Trân%20trọng%20kính%20mời.png" alt="Card 2">
     </div>
-
 </div>
 
-<div class="hint" id="statusText">Bấm vào phong bì để mở ❤️</div>
+<div class="hint" id="statusText">BẤM VÀO PHONG BÌ ĐỂ MỞ ❤️</div>
 
 <script>
     const container = document.getElementById('mainContainer');
     const hint = document.getElementById('statusText');
     let step = 0;
 
-    container.addEventListener('click', () => {
+    container.addEventListener('click', (e) => {
+        e.preventDefault();
         if (step === 0) {
             container.classList.add('step-1');
-            hint.innerText = "Bấm vào thiệp để xem chi tiết ❤️";
+            hint.innerText = "BẤM TIẾP VÀO THIỆP ❤️";
             step = 1;
         } else if (step === 1) {
             container.classList.add('step-2');
-            hint.innerText = "Trân trọng kính mời! ❤️";
+            hint.innerText = "TRÂN TRỌNG KÍNH MỜI! ❤️";
             step = 2;
         } else {
             container.classList.remove('step-1', 'step-2');
-            hint.innerText = "Bấm vào phong bì để mở ❤️";
+            hint.innerText = "BẤM VÀO PHONG BÌ ĐỂ MỞ ❤️";
             step = 0;
         }
     });
 </script>
-
 </body>
 </html>
