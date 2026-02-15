@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Hello Con Gái </title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red-velvet: #a71d2a;
+            --gold-gradient: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fcf6ba, #aa771c);
+            --bg: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+            cursor: pointer; /* Con trỏ chỉ tay để biết là bấm được */
+        }
+
+        /* --- PHẦN CHỨA CHUNG ĐỂ CĂN GIỮA --- */
+        .center-container {
+            position: relative;
+            width: 90vw;
+            max-width: 500px;
+            height: 70vh; /* Chiều cao linh hoạt để chứa cả ảnh dọc và thiệp */
+            max-height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- PHẦN HIỂN THỊ MEME --- */
+        #meme-stage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+
+        #meme-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* --- PHẦN THIỆP CƯỚI (STAGE CŨ) --- */
+        #invitation-stage {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 500 / 350; /* Tỉ lệ khung phong bì ngang */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0; /* Ẩn mặc định */
+            pointer-events: none; /* Không nhận click khi ẩn */
+            transition: opacity 0.5s ease;
+        }
+
+        /* Khi kích hoạt stage thiệp */
+        #invitation-stage.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* CSS CŨ CỦA PHONG BÌ & THIỆP */
+        .envelope {
+            position: absolute;
+            inset: 0;
+            background-color: var(--red-velvet);
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 30;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s ease;
+        }
+
+        .gold-text {
+            text-align: center;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+        }
+
+        .shuangxi { font-size: 15vw; max-font-size: 80px; margin-bottom: 5px; }
+        .names { font-family: 'Dancing Script', cursive; font-size: 8vw; max-font-size: 40px; }
+        .hearts { font-size: 5vw; max-font-size: 24px; }
+
+        .card-horizontal {
+            position: absolute;
+            width: 92%;
+            height: 85%;
+            background: white;
+            z-index: 20;
+            border-radius: 5px;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-vertical {
+            position: absolute;
+            width: 80%;
+            height: 160%;
+            background: white;
+            z-index: 10;
+            border-radius: 8px;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .card-content-img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Hiệu ứng các bước của thiệp */
+        #invitation-stage.step-1 .card-horizontal { transform: translateY(-30%); z-index: 40; }
+        #invitation-stage.step-2 .card-vertical { opacity: 1; transform: translateY(-5%); z-index: 50; pointer-events: auto; }
+        #invitation-stage.step-2 .card-horizontal { opacity: 0.3; }
+
+        /* --- DÒNG CHỮ GỢI Ý BÊN DƯỚI --- */
+        .hint {
+            position: fixed;
+            bottom: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            background: rgba(255,255,255,0.85);
+            padding: 12px 24px;
+            border-radius: 30px;
+            z-index: 100;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* Class tiện ích để ẩn hiện */
+        .hidden { display: none !important; opacity: 0; }
+
+        @media (min-width: 500px) {
+            .shuangxi { font-size: 80px; }
+            .names { font-size: 40px; }
+            .hearts { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="center-container">
+
+    <div id="meme-stage">
+        <img id="meme-image" src="" alt="Meme">
+    </div>
+
+    <div id="invitation-stage" class="hidden">
+        <div class="envelope">
+            <div class="gold-text">
+                <div class="shuangxi">囍</div>
+                <div class="names">Anh Đức</div>
+                <div class="hearts">♡♡</div>
+                <div class="names">Phương Anh</div>
+            </div>
+        </div>
+        <div class="card-horizontal">
+            <img class="card-content-img" src="Thiệp%20Mời%20BKL.png" alt="Card 1">
+        </div>
+        <div class="card-vertical">
+            <img class="card-content-img" src="Trân%20trọng%20kính%20mời.png" alt="Card 2">
+        </div>
+    </div>
+
+</div>
+
+<div class="hint" id="statusText"></div>
+
+<script>
+    // Cấu hình dữ liệu cho các bước
+    // steps 0-3: Meme trước thiệp
+    // steps 4-6: Các trạng thái của thiệp (Đóng -> Mở 1 -> Mở 2)
+    // steps 7-9: Meme sau thiệp
+    const sequenceData = [
+        { type: 'meme', img: 'Hình_1.jpg', text: 'Hello!! Bấm tiếp đi =))' },           // Step 0
+        { type: 'meme', img: 'Hình_2.jpg', text: 'Nhìn giè @~@ Bấm tiếp đi!!' },         // Step 1
+        { type: 'meme', img: 'Hình_3.jpg', text: 'Lêu lêu chưa tới. Bấm tiếp đi=)))' },  // Step 2
+        { type: 'meme', img: 'Hình_4.jpg', text: 'Đúng ròi, tới ròi nè' },               // Step 3
+        { type: 'invite', state: 'closed', text: 'BẤM VÀO PHONG BÌ ĐỂ MỞ ❤️' },            // Step 4
+        { type: 'invite', state: 'step-1', text: 'BẤM TIẾP VÀO THIỆP ❤️' },                // Step 5
+        { type: 'invite', state: 'step-2', text: 'TRÂN TRỌNG KÍNH MỜI! ❤️' },              // Step 6
+        { type: 'meme', img: 'Hình_5.jpg', text: 'Đúng ròi...M nghĩ đúng roi đấy!!' },   // Step 7
+        { type: 'meme', img: 'Hình_6.jpg', text: 'Đúng Đúng...T sắp lấy vợ dòi 🥹😞😭' }, // Step 8
+        { type: 'meme', img: 'Hình_7.jpg', text: 'Ráng sắp xếp đến dự nhá. Đợi mỗi tụi m thoi đấy 🥹😞' } // Step 9
+    ];
+
+    let currentStep = 0;
+
+    const memeStage = document.getElementById('meme-stage');
+    const memeImage = document.getElementById('meme-image');
+    const inviteStage = document.getElementById('invitation-stage');
+    const statusText = document.getElementById('statusText');
+
+    // Hàm cập nhật giao diện dựa trên bước hiện tại
+    function updateView() {
+        // Nếu đã đi hết các bước thì dừng lại
+        if (currentStep >= sequenceData.length) return;
+
+        const data = sequenceData[currentStep];
+
+        // Cập nhật dòng chữ gợi ý với hiệu ứng nhẹ
+        statusText.style.opacity = 0;
+        setTimeout(() => {
+            statusText.innerText = data.text;
+            statusText.style.opacity = 1;
+        }, 200);
+
+        if (data.type === 'meme') {
+            // Hiển thị chế độ Meme
+            inviteStage.classList.remove('active');
+            setTimeout(() => {
+                inviteStage.classList.add('hidden');
+                memeStage.classList.remove('hidden');
+
+                // Đổi ảnh meme với hiệu ứng mờ
+                memeStage.style.opacity = 0;
+                setTimeout(() => {
+                    memeImage.src = data.img;
+                    memeStage.style.opacity = 1;
+                }, 200);
+            }, 300);
+
+        } else if (data.type === 'invite') {
+            // Hiển thị chế độ Thiệp
+            memeStage.style.opacity = 0;
+            setTimeout(() => {
+                memeStage.classList.add('hidden');
+                inviteStage.classList.remove('hidden');
+
+                // Reset các class trạng thái của thiệp trước khi add class mới
+                inviteStage.classList.remove('step-1', 'step-2');
+                if (data.state !== 'closed') {
+                    inviteStage.classList.add(data.state);
+                }
+
+                // Kích hoạt hiển thị thiệp
+                setTimeout(() => {
+                    inviteStage.classList.add('active');
+                }, 100);
+            }, 300);
+        }
+    }
+
+    // Khởi tạo trạng thái ban đầu
+    updateView();
+
+    // Sự kiện click toàn màn hình để chuyển bước
+    document.body.addEventListener('click', () => {
+        if (currentStep < sequenceData.length - 1) {
+            currentStep++;
+            updateView();
+        }
+    });
+
+</script>
+</body>
+</html>
